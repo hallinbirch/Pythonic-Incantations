@@ -2,6 +2,8 @@
 #    by Lyosiss HalinbircH (Elijah Ward)
 #    License : GNU GPL3
 #   Requires : HalinbircH's LinuxToWinePath Scroll and several Default Python Libs
+#   Helps With Skyrim SE GOG on Heroic for Linux!
+#
 # import Dependecies
 import os
 import sys
@@ -82,7 +84,7 @@ def fixBethesdaInstall(gameDir,winePrefix):
     randomNumber = random.randrange(1692999999,9999999999)
     # Gets SkyrimSE working on Heroic too
     if GameID == "SkyrimSE":
-        GamePreset = SkyrimSEWorkaround(GamePath,randomNumber)
+        GamePreset = SkyrimSEGOGWorkaround(GamePath,randomNumber)
     # i had a little Trouble with the ini file but it works now
     elif GameID == "Fallout4":
         GamePreset = Fallout4GOGWorkaround(GamePath,randomNumber,winePrefix,gameDir)
