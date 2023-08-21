@@ -10,7 +10,6 @@ import sys
 import platform
 import shutil
 from LinuxToWinePath import EuclidsCFinder
-import random
 #find out what game we're looking at
 def getBethesdaID(gameDir):
     # Older Bethesda Games Work Really Well
@@ -27,42 +26,26 @@ def getBethesdaID(gameDir):
         return "SkyrimSE"
     elif os.path.exists(os.path.join(gameDir,"Fallout4.exe")):
         return "Fallout4"
-def BethSoftRegFixGen(GameID,GamePath,randomNumber):
+def BethSoftRegFixGen(GameID,GamePath):
     return [
-        r'[Software\\Wow6432Node\\Bethesda Softworks\\'+ GameID +'] ' + str(randomNumber),
+        r'[Software\\Wow6432Node\\Bethesda Softworks\\'+ GameID +']',
         r'#time=1d9ceebed86feec',
         r'"Installed Path"="'+ GamePath + '"',
         ]
 # Skyrim SE GOG Work Around
-def SkyrimSEGOGWorkaround(GamePath,randomNumber):
-    # for some reason the game is tied into the GOG inno genorated install Regestry Entry
+def SkyrimSEGOGWorkaround(GamePath):
+    # for some reason the game is tied into the GOG inno install Regestry Entry
     return [
-    r'[Software\\Wow6432Node\\GOG.com\\Games\\1711230643] ' + str(randomNumber),
-    r'#time=1d9cac8fe679c02',
-    r'"buildId"="55846306920288567"',
-    r'"dependsOn"=""',
-    r'"DLC"="1162721350"',
-    r'"exe"="'+ GamePath + 'SkyrimSELauncher.exe"',
+    r'[Software\\Wow6432Node\\GOG.com\\Games\\1711230643] ',
+    r'"exe"="'+ GamePath + '\\\\SkyrimSELauncher.exe"',
     r'"exeFile"="SkyrimSELauncher.exe"',
     r'"gameID"="1711230643"',
     r'"gameName"="The Elder Scrolls V: Skyrim Special Edition"',
-    r'"INSTALLDATE"="2023-08-09 00:31:48"',
-    r'"installer_language"="english"',
     r'"lang_code"="en-US"',
     r'"language"="english"',
-    r'"launchCommand"="'+GamePath+'SkyrimSELauncher.exe "',
-    r'"launchParam"=""',
-    r'"osbit"="64"',
-    r'"path"="'+ GamePath + '"',
-    r'"productID"="1711230643"',
-    r'"startMenu"="The Elder Scrolls V - Skyrim Special Edition"',
-    r'"startMenuLink"="C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\The Elder Scrolls V - Skyrim Special Edition [GOG.com]\\The Elder Scrolls V - Skyrim Special Edition"',
-    r'"supportLink"=""',
-    r'"uninstallCommand"="' + GamePath + 'unins000.exe"',
-    r'"ver"="1.6.659.0.8"',
-    r'"workingDir"="' + GamePath + '"'
+    r'"path"="'+ GamePath + '"'
     ]
-def Fallout4GOGWorkaround(GamePath,randomNumber,winePrefix,gameDir):
+def Fallout4GOGWorkaround(GamePath,winePrefix,gameDir):
     # OMG 5 lines to do somthing Fallout4Launcher.exe should do automatically!
         OsWalkies = [throwaway1[1] for throwaway1 in os.walk(os.path.join(winePrefix,'drive_c/users'))]
         for UserDir in OsWalkies[0]:
@@ -71,26 +54,23 @@ def Fallout4GOGWorkaround(GamePath,randomNumber,winePrefix,gameDir):
             if not os.path.exists(os.path.join(winePrefix,'drive_c/users/',UserDir,'Documents/My Games/Fallout4/','Fallout4.ini')):
                 shutil.copyfile(os.path.join(gameDir,'Fallout4_Default.ini'), os.path.join(winePrefix,'drive_c/users/',UserDir,'Documents/My Games/Fallout4/','Fallout4.ini'))
             # then the standard reg genorator script works
-            return BethSoftRegFixGen("Fallout4.exe",GamePath,randomNumber)
+            return BethSoftRegFixGen("Fallout4.exe",GamePath)
 def fixBethesdaInstall(gameDir,winePrefix):
-    random.seed(a=None, version=2)
     #Find Wine Path
     GamePath = EuclidsCFinder(gameDir,winePrefix)
     #Format for the RegestryFile
     GamePath = GamePath.replace("\\","\\\\")
     #Find the Game ID
     GameID = getBethesdaID(gameDir)
-    #Format the whole thing
-    randomNumber = random.randrange(1692999999,9999999999)
     # Gets SkyrimSE working on Heroic too
     if GameID == "SkyrimSE":
-        GamePreset = SkyrimSEGOGWorkaround(GamePath,randomNumber)
+        GamePreset = SkyrimSEGOGWorkaround(GamePath)
     # i had a little Trouble with the ini file but it works now
     elif GameID == "Fallout4":
-        GamePreset = Fallout4GOGWorkaround(GamePath,randomNumber,winePrefix,gameDir)
+        GamePreset = Fallout4GOGWorkaround(GamePath,winePrefix,gameDir)
     # fall back to good old bethesda softworks format for MW OB and FONV
     else:
-        GamePreset = BethSoftRegFixGen(GameID,GamePath,randomNumber)
+        GamePreset = BethSoftRegFixGen(GameID,GamePath)
     #open and append to RegestryFile
     with open(os.path.join(winePrefix,"system.reg"), "a") as RegestryFile:
         for iterator in GamePreset:

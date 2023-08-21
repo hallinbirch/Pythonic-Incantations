@@ -10,4 +10,4 @@ def EuclidsCFinder(LinuxPath,winePrefix):
         return LinuxPath.replace(winePrefix+"drive_c","C:").replace("/","\\")
     else:
         return WinePathfinderSpell(LinuxPath)
-# to do it all in the clipboard
+# Made For A FONV install but it has other posible applications
