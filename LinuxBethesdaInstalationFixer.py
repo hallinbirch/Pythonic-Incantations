@@ -9,6 +9,7 @@ import os
 import sys
 import platform
 import shutil
+import re
 from LinuxToWinePath import EuclidsCFinder
 #find out what game we're looking at
 def getBethesdaID(gameDir):
@@ -26,10 +27,19 @@ def getBethesdaID(gameDir):
         return "SkyrimSE"
     elif os.path.exists(os.path.join(gameDir,"Fallout4.exe")):
         return "Fallout4"
+def BethesdaSoftRegRemove(GameID, winePrefix):
+    with open(os.path.join(winePrefix,"system.reg"), "r") as RegestryFile1:
+         Reg = RegestryFile1.read()
+         pattern = re.compile(r'\[Software\\\\Wow6432Node\\\\Bethesda Softworks\\\\'+GameID+r'.*Installed Path.*"', re.DOTALL)
+         res = pattern.findall(Reg)
+         Reg2 = Reg
+         for stuff in res:
+            Reg2 = Reg2.replace(stuff, '')
+    with open(os.path.join(winePrefix,"system.reg"), "w") as RegestryFile1:
+         RegestryFile1.write(Reg2)
 def BethSoftRegFixGen(GameID,GamePath):
     return [
         r'[Software\\Wow6432Node\\Bethesda Softworks\\'+ GameID +']',
-        r'#time=1d9ceebed86feec',
         r'"Installed Path"="'+ GamePath + '"',
         ]
 # Skyrim SE GOG Work Around
@@ -54,7 +64,7 @@ def Fallout4GOGWorkaround(GamePath,winePrefix,gameDir):
             if not os.path.exists(os.path.join(winePrefix,'drive_c/users/',UserDir,'Documents/My Games/Fallout4/','Fallout4.ini')):
                 shutil.copyfile(os.path.join(gameDir,'Fallout4_Default.ini'), os.path.join(winePrefix,'drive_c/users/',UserDir,'Documents/My Games/Fallout4/','Fallout4.ini'))
             # then the standard reg genorator script works
-            return BethSoftRegFixGen("Fallout4.exe",GamePath)
+            return BethSoftRegFixGen("Fallout4",GamePath)
 def fixBethesdaInstall(gameDir,winePrefix):
     #Find Wine Path
     GamePath = EuclidsCFinder(gameDir,winePrefix)
@@ -72,11 +82,13 @@ def fixBethesdaInstall(gameDir,winePrefix):
     else:
         GamePreset = BethSoftRegFixGen(GameID,GamePath)
     #open and append to RegestryFile
+    print("cleaning Previus instalation from Regestry")
+    BethesdaSoftRegRemove(GameID, winePrefix)
+    print("installing Regestry Data")
     with open(os.path.join(winePrefix,"system.reg"), "a") as RegestryFile:
         for iterator in GamePreset:
             RegestryFile.write("\n")
             RegestryFile.write(iterator)
-print("casting Greater fix Bethesda Install")
 if sys.argv[1] == "-h" or sys.argv[1] == "--help":
     print ( "This script appends a bethesda game's install directory to the wine system.reg to get it to work in any wine prefix\n" +
             "Currently only  Morrowind, Oblivion, Fallout 3, Fallout:NV, and GOG versions of Fallout 4, and Skyrim SE Are Supported \n " +
@@ -84,4 +96,5 @@ if sys.argv[1] == "-h" or sys.argv[1] == "--help":
             "usage : python LinuxBethesdaInstalationFixer.py 'Game-Install-Directory' 'Wine-Prefix-Folder-Path' \n" +
             "both arguments are positinal and required! \n")
 else:
+    print("casting Greater fix Bethesda Install")
     fixBethesdaInstall(sys.argv[1],sys.argv[2])
