@@ -27,16 +27,16 @@ def getBethesdaID(gameDir):
         return "SkyrimSE"
     elif os.path.exists(os.path.join(gameDir,"Fallout4.exe")):
         return "Fallout4"
-def BethesdaSoftRegRemove(GameID, winePrefix):
+def BethesdaSoftRegRemove(GameID, winePrefix,removalregex):
     with open(os.path.join(winePrefix,"system.reg"), "r") as RegestryFile1:
-         Reg = RegestryFile1.read()
-         pattern = re.compile(r'\[Software\\\\Wow6432Node\\\\Bethesda Softworks\\\\'+GameID+r'.*Installed Path.*"', re.DOTALL)
-         res = pattern.findall(Reg)
-         Reg2 = Reg
-         for stuff in res:
+        Reg = RegestryFile1.read()
+        res = removalregex.findall(Reg)
+        Reg2 = Reg
+        print(res)
+        for stuff in res:
             Reg2 = Reg2.replace(stuff, '')
     with open(os.path.join(winePrefix,"system.reg"), "w") as RegestryFile1:
-         RegestryFile1.write(Reg2)
+        RegestryFile1.write(Reg2)
 def BethSoftRegFixGen(GameID,GamePath):
     return [
         r'[Software\\Wow6432Node\\Bethesda Softworks\\'+ GameID +']',
@@ -75,15 +75,18 @@ def fixBethesdaInstall(gameDir,winePrefix):
     # Gets SkyrimSE working on Heroic too
     if GameID == "SkyrimSE":
         GamePreset = SkyrimSEGOGWorkaround(GamePath)
+        removalregex = re.compile(r'\[Software\\\\Wow6432Node\\\\GOG.com\\\\Games\\\\1711230643\].*\n.*\n.*\n.*\n.*\n.*\n.*\n.*\n.*"path"=".*"')
     # i had a little Trouble with the ini file but it works now
     elif GameID == "Fallout4":
         GamePreset = Fallout4GOGWorkaround(GamePath,winePrefix,gameDir)
+        removalregex = re.compile(r'\[Software\\\\Wow6432Node\\\\Bethesda Softworks\\\\'+GameID+r'.*\n.*\n.*"Installed Path.*"')
     # fall back to good old bethesda softworks format for MW OB and FONV
     else:
         GamePreset = BethSoftRegFixGen(GameID,GamePath)
+        removalregex = re.compile(r'\[Software\\\\Wow6432Node\\\\Bethesda Softworks\\\\'+GameID+r'.*\n.*\n"Installed Path.*"')
     #open and append to RegestryFile
     print("cleaning Previus instalation from Regestry")
-    BethesdaSoftRegRemove(GameID, winePrefix)
+    BethesdaSoftRegRemove(GameID, winePrefix,removalregex)
     print("installing Regestry Data")
     with open(os.path.join(winePrefix,"system.reg"), "a") as RegestryFile:
         for iterator in GamePreset:
