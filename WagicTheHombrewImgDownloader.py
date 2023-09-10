@@ -13,5 +13,12 @@ with open('CardImageLinks.csv', newline='') as csvfile:
             print('"'+ImagePath+'" Exists Already: Skiping!')
         else:
             with open(ImagePath, 'wb') as Image:
-                Image.write(requests.get(card["link"]).content)
+                while True:
+                    try:
+                        download = requests.get(card["link		  "]).content
+                    except:
+                        print("Download Failed Retrying")
+                    else:
+                        break
+                Image.write(download)
                 time.sleep(2.5)
