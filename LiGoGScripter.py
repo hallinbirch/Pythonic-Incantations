@@ -3,7 +3,7 @@
 ##  by Lyosiss HalinbircH (Elijah Ward)
 ## Actually works for dragon age and a few other things right now
 ## it Needs More Testing and a lot more Work and is nowhere near complete
-## Any BethesdaSoftworks Gog games should work now-ish 
+## Any BethesdaSoftworks Gog games should work now-ish
 ##
 import json
 import glob
@@ -107,8 +107,8 @@ def TeribleFixesforWeirdEdgeCases(gameDir,winePrefix):
     if os.path.exists(os.path.join(gameDir,"SkyrimSE.exe")):
         GamePath = EuclidsCFinder(gameDir,winePrefix)
         GamePath = GamePath.replace("\\","\\\\")
-        print("SkyrimSE Found Aplaying Wack Hackey Fix")
-        RegEditData = TFFWECSkyrimSEGOG(GamePath):
+        print("SkyrimSE Found Aplaying Terible Fix For Weird Edge Case")
+        RegEditData = TFFWECSkyrimSEGOG(GamePath)
         AppendtoRegFile(winePrefix,RegEditData)
         return True
     else:
@@ -120,7 +120,7 @@ def LGOGScriptInterpriter(gameDir,winePrefix):
     #find install script
     RegEditData = []
     Regeditbool = False
-    WHPrun = halinbirchsWackHackPack(gameDir,winePrefix)
+    WHPrun = TeribleFixesforWeirdEdgeCases(gameDir,winePrefix)
     if not WHPrun:
         scriptPath = os.path.join(gameDir,'goggame-*.script')
         for scriptz in glob.glob(scriptPath):
